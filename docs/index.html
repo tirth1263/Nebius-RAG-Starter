@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nebius RAG Starter — The smallest RAG pipeline that actually works</title>
+<meta name="description" content="A minimal Retrieval-Augmented Generation notebook using LlamaIndex with Nebius Token Factory. Point it at a folder, ask a question, get a grounded answer.">
+<meta property="og:title" content="Nebius RAG Starter">
+<meta property="og:description" content="The smallest RAG pipeline that actually works. LlamaIndex + Nebius Token Factory in one notebook.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<style>
+  :root{
+    --bg:#07090f;
+    --bg-soft:#0c1018;
+    --panel:#11161f;
+    --panel-2:#151b26;
+    --line:#232b3a;
+    --line-soft:#1b2230;
+    --text:#e8edf7;
+    --muted:#98a3b8;
+    --dim:#6c778c;
+    --teal:#00d4aa;
+    --violet:#8b5cf6;
+    --blue:#4c8dff;
+    --amber:#f5a524;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:var(--teal);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(7,9,15,.82);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav-in{
+    max-width:var(--maxw);margin:0 auto;padding:14px 24px;
+    display:flex;align-items:center;gap:20px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--text);font-size:15px;letter-spacing:-.01em}
+  .brand:hover{text-decoration:none}
+  .brand-mark{
+    width:28px;height:28px;border-radius:8px;
+    background:linear-gradient(135deg,var(--teal),var(--violet));
+    display:grid;place-items:center;font-size:15px;
+  }
+  .nav-links{display:flex;gap:22px;margin-left:auto;align-items:center}
+  .nav-links a{color:var(--muted);font-size:14px;font-weight:500}
+  .nav-links a:hover{color:var(--text);text-decoration:none}
+  .nav-cta{
+    background:var(--text);color:var(--bg)!important;
+    padding:7px 15px;border-radius:8px;font-weight:600;font-size:13.5px;
+  }
+  .nav-cta:hover{opacity:.88}
+  @media(max-width:720px){.nav-links a:not(.nav-cta){display:none}}
+
+  /* ---------- hero ---------- */
+  header{position:relative;padding:88px 0 72px;overflow:hidden}
+  .glow{
+    position:absolute;border-radius:50%;filter:blur(110px);opacity:.22;pointer-events:none;
+  }
+  .glow-a{width:520px;height:520px;background:var(--teal);top:-220px;left:-120px}
+  .glow-b{width:460px;height:460px;background:var(--violet);top:-160px;right:-140px}
+  .grid-bg{
+    position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+    background-size:56px 56px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 75%);
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 75%);
+    opacity:.5;
+  }
+  header .wrap{position:relative}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--line);background:var(--panel);
+    padding:5px 13px 5px 8px;border-radius:100px;
+    font-size:12.5px;color:var(--muted);margin-bottom:26px;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal)}
+  h1{
+    font-size:clamp(2.4rem,6.2vw,4rem);
+    line-height:1.05;margin:0 0 20px;font-weight:800;letter-spacing:-.035em;
+  }
+  .grad{background:linear-gradient(100deg,var(--teal),var(--blue) 45%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:clamp(1.02rem,2.2vw,1.2rem);color:var(--muted);max-width:640px;margin:0 0 34px}
+  .lede strong{color:var(--text);font-weight:600}
+  .btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:44px}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:11px 20px;border-radius:10px;font-weight:600;font-size:14.5px;
+    border:1px solid transparent;transition:transform .15s ease,opacity .15s ease;
+  }
+  .btn:hover{text-decoration:none;transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--teal),#00b894);color:#04120e}
+  .btn-ghost{background:var(--panel);border-color:var(--line);color:var(--text)}
+  .btn-ghost:hover{border-color:var(--dim)}
+  .stats{display:flex;gap:38px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--line-soft)}
+  .stat{padding-top:18px}
+  .stat b{display:block;font-size:1.45rem;font-weight:700;letter-spacing:-.02em}
+  .stat span{font-size:12.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em}
+
+  /* ---------- sections ---------- */
+  section{padding:72px 0;border-top:1px solid var(--line-soft)}
+  .kicker{
+    font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--teal);margin-bottom:12px;
+  }
+  h2{font-size:clamp(1.6rem,3.4vw,2.1rem);margin:0 0 14px;font-weight:750;letter-spacing:-.025em}
+  .sub{color:var(--muted);max-width:660px;margin:0 0 38px;font-size:1.02rem}
+
+  /* ---------- features ---------- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:16px}
+  .card{
+    background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;padding:22px;
+    transition:border-color .2s ease,transform .2s ease;
+  }
+  .card:hover{border-color:var(--line);transform:translateY(-2px)}
+  .card .ico{
+    width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
+    font-size:17px;margin-bottom:14px;background:var(--panel-2);border:1px solid var(--line-soft);
+  }
+  .card h3{margin:0 0 7px;font-size:15.5px;font-weight:650;letter-spacing:-.01em}
+  .card p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+  .card code{font-family:var(--mono);font-size:12.5px;color:var(--teal);background:rgba(0,212,170,.08);padding:1px 5px;border-radius:4px}
+
+  /* ---------- pipeline ---------- */
+  .pipe{background:var(--panel);border:1px solid var(--line-soft);border-radius:16px;padding:28px 22px;overflow-x:auto}
+  .pipe svg{display:block;min-width:660px;width:100%;height:auto;margin:0 auto}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:34px}
+  .step{border-left:2px solid var(--line);padding-left:16px}
+  .step .n{font-family:var(--mono);font-size:12px;color:var(--teal);font-weight:700;letter-spacing:.05em}
+  .step h4{margin:4px 0 6px;font-size:15px;font-weight:650}
+  .step p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.6}
+
+  /* ---------- code ---------- */
+  .code{
+    background:#0a0e15;border:1px solid var(--line-soft);border-radius:13px;overflow:hidden;
+  }
+  .code-bar{
+    display:flex;align-items:center;gap:8px;padding:10px 15px;
+    background:var(--panel-2);border-bottom:1px solid var(--line-soft);
+  }
+  .code-bar .fn{font-family:var(--mono);font-size:12.5px;color:var(--dim);margin-left:4px}
+  .tl{width:11px;height:11px;border-radius:50%}
+  pre{
+    margin:0;padding:20px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.75;color:#c9d3e4;
+  }
+  .k{color:#c084fc}.s{color:#7ee0b8}.c{color:#5a677d;font-style:italic}
+  .f{color:#78b6ff}.n{color:#f5a524}.t{color:#00d4aa}.p{color:#e8edf7}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:860px){.two{grid-template-columns:1fr}}
+
+  /* ---------- stack table ---------- */
+  .tbl{width:100%;border-collapse:collapse;font-size:14px}
+  .tbl th{
+    text-align:left;padding:11px 14px;color:var(--dim);font-weight:600;font-size:11.5px;
+    text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid var(--line);
+  }
+  .tbl td{padding:14px;border-bottom:1px solid var(--line-soft);color:var(--muted);vertical-align:top}
+  .tbl td:first-child{color:var(--text);font-weight:600;white-space:nowrap}
+  .tbl code{font-family:var(--mono);font-size:12.5px;color:var(--teal)}
+  .tbl-wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;padding:6px 8px}
+
+  /* ---------- next steps ---------- */
+  .next{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .nx{display:flex;gap:13px;background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:17px 19px}
+  .nx .b{color:var(--violet);font-size:15px;line-height:1.5}
+  .nx h4{margin:0 0 4px;font-size:14.5px;font-weight:650}
+  .nx p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
+  .nx code{font-family:var(--mono);font-size:12px;color:var(--teal)}
+
+  /* ---------- cta ---------- */
+  .cta{
+    position:relative;overflow:hidden;text-align:center;
+    background:linear-gradient(135deg,rgba(0,212,170,.09),rgba(139,92,246,.09));
+    border:1px solid var(--line);border-radius:18px;padding:52px 28px;
+  }
+  .cta h2{margin-bottom:10px}
+  .cta p{color:var(--muted);max-width:520px;margin:0 auto 26px}
+  .cta .btns{justify-content:center;margin-bottom:0}
+
+  footer{border-top:1px solid var(--line-soft);padding:34px 0 46px;color:var(--dim);font-size:13.5px}
+  .foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+  .foot a{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <a class="brand" href="#top"><span class="brand-mark">🧠</span> Nebius RAG Starter</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#code">Code</a>
+      <a href="#start">Quickstart</a>
+      <a href="#next">Next steps</a>
+      <a class="nav-cta" href="https://github.com/tirth1263/Nebius-RAG-Starter">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<header id="top">
+  <div class="grid-bg"></div>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+  <div class="wrap">
+    <div class="pill"><span class="dot"></span> LlamaIndex &nbsp;·&nbsp; Nebius Token Factory &nbsp;·&nbsp; DeepSeek-V3</div>
+    <h1>The smallest RAG&nbsp;pipeline<br><span class="grad">that actually works.</span></h1>
+    <p class="lede">
+      Point it at a folder. Ask a question. Get an answer grounded in <strong>your own documents</strong> —
+      not in whatever the model happened to memorise. One notebook, one function, roughly twenty lines of real logic.
+      No vector database, no local GPU, no server to deploy.
+    </p>
+    <div class="btns">
+      <a class="btn btn-primary" href="https://github.com/tirth1263/Nebius-RAG-Starter">★ &nbsp;View on GitHub</a>
+      <a class="btn btn-ghost" href="https://colab.research.google.com/github/tirth1263/Nebius-RAG-Starter/blob/main/nebius_rag.ipynb">▶ &nbsp;Open in Colab</a>
+      <a class="btn btn-ghost" href="#start">Quickstart</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>~20</b><span>Lines of logic</span></div>
+      <div class="stat"><b>1</b><span>API key</span></div>
+      <div class="stat"><b>0</b><span>GPUs required</span></div>
+      <div class="stat"><b>60s</b><span>To first answer</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="why">
+  <div class="wrap">
+    <div class="kicker">The problem</div>
+    <h2>Language models are confident about things they were never taught.</h2>
+    <p class="sub">
+      Retrieval-Augmented Generation fixes that by looking up the right passage from your documents at question
+      time and handing it to the model as context. The model's job shrinks from <em>"recall a fact"</em> to
+      <em>"read this and answer"</em> — a task language models are dramatically better at.
+    </p>
+    <div class="cards">
+      <div class="card">
+        <div class="ico">📂</div>
+        <h3>Any folder, any format</h3>
+        <p><code>SimpleDirectoryReader</code> ingests Markdown, text, PDF, DOCX and CSV from a local directory — no per-format code to write.</p>
+      </div>
+      <div class="card">
+        <div class="ico">⚡</div>
+        <h3>In-memory vector index</h3>
+        <p><code>VectorStoreIndex</code> builds the whole index in RAM. Zero infrastructure to stand up while you're still learning the shape of it.</p>
+      </div>
+      <div class="card">
+        <div class="ico">☁️</div>
+        <h3>Nebius-hosted models</h3>
+        <p>Embeddings <em>and</em> generation run server-side on Nebius Token Factory. One API key, no local weights, no accelerator.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🎯</div>
+        <h3>One function interface</h3>
+        <p><code>run_rag_completion()</code> is the entire application. Everything else in the notebook is commentary.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🔍</div>
+        <h3>Traceable answers</h3>
+        <p>Every response carries its <code>source_nodes</code> with similarity scores, so you can see which chunk produced which claim.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🧩</div>
+        <h3>Swappable defaults</h3>
+        <p>Change one string to try a different LLM or embedding model. Nothing else in the pipeline cares.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="kicker">How it works</div>
+    <h2>Four stages, start to finish</h2>
+    <p class="sub">Load documents, embed them into vectors, retrieve the closest matches to a question, then let the LLM write an answer constrained by what was actually retrieved.</p>
+
+    <div class="pipe">
+      <svg viewBox="0 0 900 300" role="img" aria-label="Diagram of the RAG pipeline: documents are loaded and embedded into a vector index, a query retrieves the top matching chunks, and the LLM generates a grounded answer.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#4c8dff"/>
+          </marker>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#8b5cf6"/>
+          </marker>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#00d4aa" stop-opacity=".16"/>
+            <stop offset="100%" stop-color="#00d4aa" stop-opacity=".05"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#8b5cf6" stop-opacity=".16"/>
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity=".05"/>
+          </linearGradient>
+        </defs>
+
+        <!-- top row: index build -->
+        <g font-family="ui-monospace,Menlo,Consolas,monospace">
+          <rect x="20"  y="40" width="170" height="66" rx="12" fill="url(#g1)" stroke="#00d4aa" stroke-opacity=".45"/>
+          <text x="105" y="68"  fill="#e8edf7" font-size="14" font-weight="600" text-anchor="middle">./data/</text>
+          <text x="105" y="88"  fill="#98a3b8" font-size="11" text-anchor="middle">SimpleDirectoryReader</text>
+
+          <rect x="250" y="40" width="170" height="66" rx="12" fill="url(#g1)" stroke="#00d4aa" stroke-opacity=".45"/>
+          <text x="335" y="68"  fill="#e8edf7" font-size="14" font-weight="600" text-anchor="middle">Chunks → Vectors</text>
+          <text x="335" y="88"  fill="#98a3b8" font-size="11" text-anchor="middle">BAAI/bge-en-icl</text>
+
+          <rect x="480" y="40" width="170" height="66" rx="12" fill="url(#g1)" stroke="#00d4aa" stroke-opacity=".45"/>
+          <text x="565" y="68"  fill="#e8edf7" font-size="14" font-weight="600" text-anchor="middle">Vector Index</text>
+          <text x="565" y="88"  fill="#98a3b8" font-size="11" text-anchor="middle">in-memory</text>
+
+          <line x1="192" y1="73" x2="246" y2="73" stroke="#4c8dff" stroke-width="1.6" marker-end="url(#ar)"/>
+          <line x1="422" y1="73" x2="476" y2="73" stroke="#4c8dff" stroke-width="1.6" marker-end="url(#ar)"/>
+
+          <!-- query in -->
+          <rect x="710" y="40" width="170" height="66" rx="12" fill="#151b26" stroke="#232b3a"/>
+          <text x="795" y="68"  fill="#e8edf7" font-size="14" font-weight="600" text-anchor="middle">Your question</text>
+          <text x="795" y="88"  fill="#98a3b8" font-size="11" text-anchor="middle">query_text</text>
+
+          <!-- middle: retrieval -->
+          <path d="M565 110 L565 150" stroke="#8b5cf6" stroke-width="1.6" marker-end="url(#ar2)"/>
+          <path d="M795 110 L795 132 Q795 150 777 150 L660 150" stroke="#8b5cf6" stroke-width="1.6" fill="none" marker-end="url(#ar2)"/>
+
+          <rect x="440" y="152" width="215" height="60" rx="12" fill="url(#g2)" stroke="#8b5cf6" stroke-opacity=".45"/>
+          <text x="547" y="177" fill="#e8edf7" font-size="14" font-weight="600" text-anchor="middle">Top-k retrieved chunks</text>
+          <text x="547" y="196" fill="#98a3b8" font-size="11" text-anchor="middle">cosine similarity · k = 5</text>
+
+          <!-- bottom: generation -->
+          <line x1="436" y1="182" x2="382" y2="182" stroke="#8b5cf6" stroke-width="1.6" marker-end="url(#ar2)"/>
+          <rect x="205" y="152" width="170" height="60" rx="12" fill="url(#g2)" stroke="#8b5cf6" stroke-opacity=".45"/>
+          <text x="290" y="177" fill="#e8edf7" font-size="14" font-weight="600" text-anchor="middle">NebiusLLM</text>
+          <text x="290" y="196" fill="#98a3b8" font-size="11" text-anchor="middle">DeepSeek-V3</text>
+
+          <path d="M290 216 L290 240" stroke="#00d4aa" stroke-width="1.6" marker-end="url(#ar)"/>
+          <rect x="185" y="242" width="210" height="44" rx="12" fill="url(#g1)" stroke="#00d4aa" stroke-opacity=".55"/>
+          <text x="290" y="269" fill="#00d4aa" font-size="14" font-weight="700" text-anchor="middle">Grounded answer + sources</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="n">STAGE 01</div>
+        <h4>Load</h4>
+        <p>Walk the directory and parse every file into LlamaIndex <code>Document</code> objects.</p>
+      </div>
+      <div class="step">
+        <div class="n">STAGE 02</div>
+        <h4>Index</h4>
+        <p>Split into chunks, embed each one into a vector — a numeric fingerprint of its meaning — and store them.</p>
+      </div>
+      <div class="step">
+        <div class="n">STAGE 03</div>
+        <h4>Retrieve</h4>
+        <p>Embed the question with the <em>same</em> model, compare by cosine similarity, keep the closest <code>k</code> chunks.</p>
+      </div>
+      <div class="step">
+        <div class="n">STAGE 04</div>
+        <h4>Generate</h4>
+        <p>Pack those chunks into a prompt and let the LLM answer, constrained by what was actually retrieved.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="code">
+  <div class="wrap">
+    <div class="kicker">The whole thing</div>
+    <h2>This is the entire application</h2>
+    <p class="sub">Not a simplified excerpt. The function below is what runs — everything else in the notebook is explanation around it.</p>
+
+    <div class="code">
+      <div class="code-bar">
+        <span class="tl" style="background:#ff5f57"></span>
+        <span class="tl" style="background:#febc2e"></span>
+        <span class="tl" style="background:#28c840"></span>
+        <span class="fn">nebius_rag.ipynb</span>
+      </div>
+<pre><span class="k">from</span> <span class="p">llama_index.core</span> <span class="k">import</span> <span class="t">Settings</span>, <span class="t">SimpleDirectoryReader</span>, <span class="t">VectorStoreIndex</span>
+<span class="k">from</span> <span class="p">llama_index.embeddings.nebius</span> <span class="k">import</span> <span class="t">NebiusEmbedding</span>
+<span class="k">from</span> <span class="p">llama_index.llms.nebius</span> <span class="k">import</span> <span class="t">NebiusLLM</span>
+
+
+<span class="k">def</span> <span class="f">run_rag_completion</span>(
+    document_dir: <span class="t">str</span>,
+    query_text: <span class="t">str</span>,
+    embedding_model: <span class="t">str</span> = <span class="s">"BAAI/bge-en-icl"</span>,
+    generative_model: <span class="t">str</span> = <span class="s">"deepseek-ai/DeepSeek-V3"</span>,
+    similarity_top_k: <span class="t">int</span> = <span class="n">5</span>,
+) -&gt; <span class="t">str</span>:
+    <span class="c"># Point LlamaIndex at Nebius Token Factory</span>
+    Settings.llm = <span class="f">NebiusLLM</span>(api_key=NEBIUS_API_KEY, model=generative_model)
+    Settings.embed_model = <span class="f">NebiusEmbedding</span>(api_key=NEBIUS_API_KEY, model_name=embedding_model)
+
+    <span class="c"># 1. Load every document in the directory</span>
+    documents = <span class="f">SimpleDirectoryReader</span>(document_dir).<span class="f">load_data</span>()
+
+    <span class="c"># 2. Chunk, embed and index them in memory</span>
+    index = VectorStoreIndex.<span class="f">from_documents</span>(documents)
+
+    <span class="c"># 3. Retrieve top-k chunks and generate a grounded answer</span>
+    response = index.<span class="f">as_query_engine</span>(similarity_top_k=similarity_top_k).<span class="f">query</span>(query_text)
+
+    <span class="k">return</span> <span class="f">str</span>(response)</pre>
+    </div>
+
+    <div class="two" style="margin-top:18px">
+      <div class="code">
+        <div class="code-bar"><span class="fn">Ask a question</span></div>
+<pre>answer = <span class="f">run_rag_completion</span>(
+    document_dir=<span class="s">"./data"</span>,
+    query_text=<span class="s">"What is RAG, and why use it</span>
+<span class="s">                 instead of fine-tuning?"</span>,
+)
+<span class="f">print</span>(answer)</pre>
+      </div>
+      <div class="code">
+        <div class="code-bar"><span class="fn">See where the answer came from</span></div>
+<pre><span class="k">for</span> node <span class="k">in</span> response.source_nodes:
+    <span class="f">print</span>(node.metadata[<span class="s">"file_name"</span>],
+          <span class="f">round</span>(node.score, <span class="n">4</span>))
+    <span class="f">print</span>(node.<span class="f">get_content</span>()[:<span class="n">200</span>])</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="wrap">
+    <div class="kicker">Tech stack</div>
+    <h2>Every choice, and why</h2>
+    <p class="sub">Six moving parts. Each one earns its place.</p>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Orchestration</td><td><a href="https://www.llamaindex.ai/">LlamaIndex</a></td><td>Loading, chunking, indexing and query orchestration in a handful of calls.</td></tr>
+          <tr><td>Embeddings</td><td><code>BAAI/bge-en-icl</code></td><td>Strong English retrieval benchmarks, served remotely — nothing to download.</td></tr>
+          <tr><td>Generation</td><td><code>deepseek-ai/DeepSeek-V3</code></td><td>Capable open-weights model with a large context window.</td></tr>
+          <tr><td>Inference host</td><td><a href="https://dub.sh/nebius">Nebius Token Factory</a></td><td>OpenAI-compatible API, one key for both models, per-token billing.</td></tr>
+          <tr><td>Runtime</td><td>Python 3.9+ / Jupyter</td><td>Read the pipeline stage by stage instead of running a black box.</td></tr>
+          <tr><td>This site</td><td>Static HTML on GitHub Pages</td><td>Zero dependencies, no build step, nothing to keep alive.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <div class="kicker">Quickstart</div>
+    <h2>Sixty seconds to your first grounded answer</h2>
+    <p class="sub">The repo ships with sample documents in <code style="font-family:var(--mono);color:var(--teal)">./data</code>, so it answers a real question on the very first run — no setup ritual required.</p>
+
+    <div class="two">
+      <div class="code">
+        <div class="code-bar"><span class="fn">1 · Install</span></div>
+<pre><span class="c"># clone and install</span>
+git clone https://github.com/tirth1263/Nebius-RAG-Starter.git
+<span class="k">cd</span> Nebius-RAG-Starter
+pip install -r requirements.txt</pre>
+      </div>
+      <div class="code">
+        <div class="code-bar"><span class="fn">2 · Add your key</span></div>
+<pre><span class="c"># get one at https://dub.sh/nebius</span>
+cp .env.example .env
+
+<span class="c"># .env</span>
+NEBIUS_API_KEY=<span class="s">"your_nebius_api_key"</span></pre>
+      </div>
+    </div>
+
+    <div class="code" style="margin-top:18px">
+      <div class="code-bar"><span class="fn">3 · Run it</span></div>
+<pre>jupyter notebook nebius_rag.ipynb
+
+<span class="c"># Point `document_dir` at your own folder, set `query_text`</span>
+<span class="c"># to your question, then run all cells.</span></pre>
+    </div>
+
+    <p style="color:var(--dim);font-size:13.5px;margin-top:16px">
+      🔒 <code style="font-family:var(--mono)">.env</code> is gitignored, and the notebook falls back to an interactive
+      <code style="font-family:var(--mono)">getpass</code> prompt — your API key never has to be saved inside the <code style="font-family:var(--mono)">.ipynb</code>.
+    </p>
+  </div>
+</section>
+
+<section id="next">
+  <div class="wrap">
+    <div class="kicker">Where to go next</div>
+    <h2>This is the floor, not the ceiling</h2>
+    <p class="sub">Once the pipeline makes sense, these are the upgrades that pay off first — roughly in order of return on effort.</p>
+    <div class="next">
+      <div class="nx"><span class="b">▸</span><div><h4>Persist the index</h4><p><code>index.storage_context.persist()</code> so you stop re-embedding unchanged documents. Biggest cost win available.</p></div></div>
+      <div class="nx"><span class="b">▸</span><div><h4>Add a reranker</h4><p>Retrieve 20 candidates, rerank, keep the best 5. Vector similarity is a coarse signal.</p></div></div>
+      <div class="nx"><span class="b">▸</span><div><h4>Hybrid search</h4><p>Combine dense vectors with BM25 to catch exact terms that embeddings blur over.</p></div></div>
+      <div class="nx"><span class="b">▸</span><div><h4>Move to a real vector store</h4><p>Qdrant, Chroma or pgvector, once the collection outgrows RAM.</p></div></div>
+      <div class="nx"><span class="b">▸</span><div><h4>Tune chunking</h4><p><code>chunk_size</code> and <code>chunk_overlap</code> affect answer quality more than most people expect.</p></div></div>
+      <div class="nx"><span class="b">▸</span><div><h4>Stream the response</h4><p><code>as_query_engine(streaming=True)</code> for a UI that feels alive instead of frozen.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="cta">
+      <h2>Clone it, run it, break it.</h2>
+      <p>Everything is MIT licensed. Fork it as the base for your own retrieval stack.</p>
+      <div class="btns">
+        <a class="btn btn-primary" href="https://github.com/tirth1263/Nebius-RAG-Starter">★ &nbsp;Star on GitHub</a>
+        <a class="btn btn-ghost" href="https://colab.research.google.com/github/tirth1263/Nebius-RAG-Starter/blob/main/nebius_rag.ipynb">▶ &nbsp;Open in Colab</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div>Built with <a href="https://www.llamaindex.ai/">LlamaIndex</a> and <a href="https://dub.sh/nebius">Nebius Token Factory</a> · MIT licensed</div>
+    <div><a href="https://github.com/tirth1263">@tirth1263</a> · <a href="https://github.com/tirth1263/Nebius-RAG-Starter">Repository</a></div>
+  </div>
+</footer>
+
+</body>
+</html>

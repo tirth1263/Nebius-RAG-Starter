@@ -1,0 +1,10 @@
+# Core RAG stack
+llama-index>=0.12.0
+llama-index-llms-nebius>=0.1.0
+llama-index-embeddings-nebius>=0.1.0
+
+# Loads NEBIUS_API_KEY from a local .env file
+python-dotenv>=1.0.0
+
+# Notebook runtime
+jupyter>=1.0.0
