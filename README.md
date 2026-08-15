@@ -52,6 +52,36 @@ Run all cells. The included sample documents in `./data` mean it answers a real 
 
 ### 🎬 What that looks like
 
+<!-- ══════════════════════════════════════════════════════════════════════
+     OPTIONAL: turn the video into an inline player.
+
+     GitHub only renders a video player for files uploaded through its own
+     web UI — a committed .mp4 cannot be embedded, which is why the GIF
+     below is the default preview. To swap in a real player:
+
+       1. Open a new issue draft on this repo (do NOT submit it):
+          https://github.com/tirth1263/Nebius-RAG-Starter/issues/new
+
+       2. Drag assets/demo.mp4 from your clone into the comment box and
+          wait for the upload to finish.
+
+       3. GitHub inserts markdown containing a URL shaped like:
+          https://github.com/user-attachments/assets/0a1b2c3d-4e5f-...
+
+       4. Copy just that URL. Close the issue draft without submitting.
+
+       5. Paste it on the empty line marked below — bare URL, on its own
+          line. No markdown link syntax, no <video> tag; GitHub expands a
+          bare user-attachments URL into a player automatically.
+
+     Once the player renders, delete the <div> holding the GIF just below.
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ▼▼ PASTE THE user-attachments URL ON THE EMPTY LINE BELOW ▼▼ -->
+
+
+<!-- ▲▲ PASTE ABOVE THIS LINE ▲▲ -->
+
 <div align="center">
   <img src="assets/demo.gif" alt="Animated walkthrough of the notebook: the API key loads, imports run, a question is sent to the RAG pipeline, an answer streams in, and the retrieved source chunks are printed with similarity scores" width="820">
   <br>
