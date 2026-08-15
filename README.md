@@ -68,6 +68,15 @@ Run all cells. The included sample documents in `./data` mean it answers a real 
 
 ## 🔬 How it works
 
+<div align="center">
+  <a href="https://tirth1263.github.io/Nebius-RAG-Starter/#how">
+    <img src="assets/pipeline.png" alt="The four stages of the RAG pipeline: load documents, embed and index them, retrieve the top-k closest chunks for a question, then generate a grounded answer" width="880">
+  </a>
+</div>
+
+<details>
+<summary>Same diagram as plain text</summary>
+
 ```
      ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
      │   ./data/    │     │  Chunks +    │     │   Vector     │
@@ -86,6 +95,8 @@ Run all cells. The included sample documents in `./data` mean it answers a real 
                                                         │
                                                  "your question"
 ```
+
+</details>
 
 **1. Load** — `SimpleDirectoryReader` walks your directory and parses every file into LlamaIndex `Document` objects.
 
@@ -243,7 +254,8 @@ Nebius-RAG-Starter/
 ├── docs/
 │   └── index.html            # Project site, published via GitHub Pages
 ├── assets/
-│   └── screenshot.png        # Site preview used in this README
+│   ├── screenshot.png        # Site preview used in this README
+│   └── pipeline.png          # Pipeline diagram used in this README
 ├── requirements.txt          # Pinned dependency floor
 ├── .env.example              # Template for your API key
 ├── .gitignore
