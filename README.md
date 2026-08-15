@@ -53,15 +53,9 @@ Run all cells. The included sample documents in `./data` mean it answers a real 
 ### 🎬 What that looks like
 
 <div align="center">
-
-<video src="https://raw.githubusercontent.com/tirth1263/Nebius-RAG-Starter/main/assets/demo.mp4" controls muted width="820">
-  <a href="https://raw.githubusercontent.com/tirth1263/Nebius-RAG-Starter/main/assets/demo.mp4">▶ Watch the walkthrough video (MP4, 14s)</a>
-</video>
-
-</div>
-
-<div align="center">
   <img src="assets/demo.gif" alt="Animated walkthrough of the notebook: the API key loads, imports run, a question is sent to the RAG pipeline, an answer streams in, and the retrieved source chunks are printed with similarity scores" width="820">
+  <br>
+  <sub>▶ Also available as a smoother 14-second video — <a href="assets/demo.mp4">assets/demo.mp4</a> (880×836, 218&nbsp;KB)</sub>
 </div>
 
 > ⚠️ **Illustrative walkthrough, not a recorded run.** The cells and code are exactly those in `nebius_rag.ipynb`, but the answer text and similarity scores shown are representative examples rather than captured model output. Run the notebook with your own key to see real results.
@@ -272,7 +266,8 @@ Nebius-RAG-Starter/
 ├── assets/
 │   ├── screenshot.png        # Site preview used in this README
 │   ├── pipeline.png          # Pipeline diagram used in this README
-│   └── demo.gif              # Illustrative notebook walkthrough
+│   ├── demo.gif              # Illustrative notebook walkthrough
+│   └── demo.mp4              # Same walkthrough, smoother, as video
 ├── requirements.txt          # Pinned dependency floor
 ├── .env.example              # Template for your API key
 ├── .gitignore
