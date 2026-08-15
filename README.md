@@ -50,6 +50,14 @@ jupyter notebook nebius_rag.ipynb
 
 Run all cells. The included sample documents in `./data` mean it answers a real question on the very first run — no setup ritual required.
 
+### 🎬 What that looks like
+
+<div align="center">
+  <img src="assets/demo.gif" alt="Animated walkthrough of the notebook: the API key loads, imports run, a question is sent to the RAG pipeline, an answer streams in, and the retrieved source chunks are printed with similarity scores" width="820">
+</div>
+
+> ⚠️ **Illustrative walkthrough, not a recorded run.** The cells and code are exactly those in `nebius_rag.ipynb`, but the answer text and similarity scores shown are representative examples rather than captured model output. Run the notebook with your own key to see real results.
+
 ---
 
 ## 🚀 Features
@@ -255,7 +263,8 @@ Nebius-RAG-Starter/
 │   └── index.html            # Project site, published via GitHub Pages
 ├── assets/
 │   ├── screenshot.png        # Site preview used in this README
-│   └── pipeline.png          # Pipeline diagram used in this README
+│   ├── pipeline.png          # Pipeline diagram used in this README
+│   └── demo.gif              # Illustrative notebook walkthrough
 ├── requirements.txt          # Pinned dependency floor
 ├── .env.example              # Template for your API key
 ├── .gitignore
