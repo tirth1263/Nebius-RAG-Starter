@@ -15,6 +15,14 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Notebook](https://img.shields.io/badge/Jupyter-Notebook-F37626?style=flat-square&logo=jupyter&logoColor=white)
 
+<br>
+
+<a href="https://tirth1263.github.io/Nebius-RAG-Starter/">
+  <img src="assets/screenshot.png" alt="Nebius RAG Starter project site" width="880">
+</a>
+
+<sub>↑ The project site — <a href="https://tirth1263.github.io/Nebius-RAG-Starter/">tirth1263.github.io/Nebius-RAG-Starter</a></sub>
+
 </div>
 
 ---
@@ -234,6 +242,8 @@ Nebius-RAG-Starter/
 │   └── nebius_token_factory.md
 ├── docs/
 │   └── index.html            # Project site, published via GitHub Pages
+├── assets/
+│   └── screenshot.png        # Site preview used in this README
 ├── requirements.txt          # Pinned dependency floor
 ├── .env.example              # Template for your API key
 ├── .gitignore
